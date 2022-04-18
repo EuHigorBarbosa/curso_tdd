@@ -13,18 +13,18 @@ class RemoteAuthentication {
   });
 
   Future<void>? auth() async {
-    return await httpClient.request(url: url);
+    return await httpClient.request(url: url, method: 'post');
   }
 }
 
 abstract class HttpClient {
-  Future<void>? request({required String url});
+  Future<void>? request({required String url, required method});
 }
 
 class HttpClientSpy extends Mock implements HttpClient {}
 
 void main() {
-  test('should call HttpClient with correct URL', () async {
+  test('should call HttpClient with correct URL and values', () async {
     final httpClientFake = HttpClientSpy();
     final url = faker.internet.httpUrl(); //'http://www.nubank.com.br'; //
     final sut = RemoteAuthentication(httpClient: httpClientFake, url: url);
@@ -32,6 +32,6 @@ void main() {
     //var x = await sut.auth();
     //var y = await httpClientFake.request(url: url);
 
-    verify(httpClientFake.request(url: url));
+    verify(httpClientFake.request(url: url, method: 'post'));
   });
 }
