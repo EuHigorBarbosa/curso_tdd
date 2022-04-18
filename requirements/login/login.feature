@@ -1,3 +1,6 @@
+Arquivo de BDD (Behavior Driven Development - visão não técnica) - Para cada Feature eu tenho pelo menos um use case...neste caso o use_case autenticação por API usando internet. Outro caso de uso que poderia existir seria a autenticação local. 
+Cada use_case tem um documento proprio indicando as várias exceções que podem acontecer.
+
 Feature: Login
 Como um cliente
 Quero poder acessar minha conta e me manter logado
