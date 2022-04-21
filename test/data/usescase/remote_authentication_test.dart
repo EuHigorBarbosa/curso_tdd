@@ -1,28 +1,14 @@
+//imports externos
 import 'package:faker/faker.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-//import 'package:test/test.dart';
+//imports internos ao flutter
+import 'package:flutter_test/flutter_test.dart';
+//imports outras layers (aí tem que ter endereço completo, não pode usar ../)
 import 'package:manguinho01/domain/usecases/usecases.dart';
+import 'package:manguinho01/data_layer/http/http.dart';
+import 'package:manguinho01/data_layer/usecases/usecases.dart';
 
-class RemoteAuthentication {
-  final HttpClient httpClient;
-  final String url;
-
-  RemoteAuthentication({
-    required this.httpClient,
-    required this.url,
-  });
-
-  Future<void>? auth(AuthenticationParams params) async {
-    final body = {'email': params.email, 'password': params.secret};
-    return await httpClient.request(url: url, method: 'post', body: body);
-  }
-}
-
-abstract class HttpClient {
-  Future<void>? request(
-      {required String url, required String method, Map body});
-}
+//imports mesma layers
 
 class HttpClientSpy extends Mock implements HttpClient {}
 
