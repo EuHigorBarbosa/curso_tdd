@@ -63,7 +63,8 @@ void main() {
     expect(future, throwsA(DomainError.unexpected));
   });
 
-  test('should throw UnexpectedError if HttpClient returns 404 ()', () async {
+  test('should throw UnexpectedError if HttpClient returns 404 (url inválida)',
+      () async {
     when(() => httpClientFake.request(
             url: any(named: 'url', that: anything),
             method: any(named: 'method', that: anything),
@@ -73,5 +74,33 @@ void main() {
     final future = sut.auth(params);
 
     expect(future, throwsA(DomainError.unexpected));
+  });
+
+  test(
+      'should throw UnexpectedError if HttpClient returns 500 (falha no servidor)',
+      () async {
+    when(() => httpClientFake.request(
+            url: any(named: 'url', that: anything),
+            method: any(named: 'method', that: anything),
+            body: any(named: 'body', that: anything)))
+        .thenThrow(HttpError.serverError);
+
+    final future = sut.auth(params);
+
+    expect(future, throwsA(DomainError.unexpected));
+  });
+
+  test(
+      'should throw InvalidCredencialsError if HttpClient returns 401 (Unauthorized credentials)',
+      () async {
+    when(() => httpClientFake.request(
+            url: any(named: 'url', that: anything),
+            method: any(named: 'method', that: anything),
+            body: any(named: 'body', that: anything)))
+        .thenThrow(HttpError.unauthorizedCredencials);
+
+    final future = sut.auth(params);
+
+    expect(future, throwsA(DomainError.invalidCredencials));
   });
 }
