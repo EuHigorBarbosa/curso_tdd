@@ -17,17 +17,19 @@ void main() {
   late HttpClientSpy httpClientFake;
   late RemoteAuthentication sut;
   late String url;
+  late AuthenticationParams params;
   setUpAll(() {
     registerFallbackValue(HttpClientSpy());
   });
+
   setUp(() {
     httpClientFake = HttpClientSpy();
     url = faker.internet.httpUrl(); //'http://www.nubank.com.br'; //
     sut = RemoteAuthentication(httpClient: httpClientFake, url: url);
+    params = AuthenticationParams(
+        email: faker.internet.email(), secret: faker.internet.password());
   });
   test('should call HttpClient with correct URL and values', () async {
-    final params = AuthenticationParams(
-        email: faker.internet.email(), secret: faker.internet.password());
     await sut.auth(params);
     //var x = await sut.auth();
     //var y = await httpClientFake.request(url: url);
@@ -56,8 +58,6 @@ void main() {
             body: any(named: 'body', that: anything)))
         .thenThrow(HttpError.badRequest);
 
-    final params = AuthenticationParams(
-        email: faker.internet.email(), secret: faker.internet.password());
     final future = sut.auth(params);
 
     expect(future, throwsA(DomainError.unexpected));
