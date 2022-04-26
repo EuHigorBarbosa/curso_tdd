@@ -1,3 +1,7 @@
+// Tenho que rever a aula 10 em seu inteiro teor para determinar quais
+// os tipos de retornos que o programa tinha antes para escolher corretamente
+// os nulls  e o tipos
+
 //imports externos
 import 'package:faker/faker.dart';
 import 'package:mocktail/mocktail.dart'; //imports internos ao flutter
@@ -30,6 +34,24 @@ void main() {
         email: faker.internet.email(), secret: faker.internet.password());
   });
   test('should call HttpClient with correct URL and values', () async {
+    ///Eu preciso adicionar um mock de caso de sucesso para que ele não gere uma
+    ///exceção ao usar os parametros Mocados que vieram do setup. No setUp eu moco um RemoteAuthentication de nome sut.
+    ///Esse sut é utilizado pelo metodo auth(). Se eu não mocar o caso de sucesso (ou seja, se eu não simular que a resposta
+    ///a um request utilizando params é um map válido do tipo {'accessToken: 'x': 'name':'y'}) aí então ele vai utilizar o
+    ///auth lá do programa. E no programa real, caso não haja uma resposta válida (httpResponse válida) aí gera-se null e cai
+    ///no erro de 'null' is not a subtype of Map<dynamic, dynamic> que é a httpREsponse válida. Então tem que mocar o caminho
+    ///feliz utilizando:
+
+    when(() => httpClientFake.request(
+            url: any(named: 'url', that: anything),
+            method: any(named: 'method', that: anything),
+            body: any(named: 'body', that: anything)))
+        .thenAnswer((_) async =>
+            {'accessToken': faker.guid.guid(), 'name': faker.person.name()});
+
+    /// Aqui eu simulo que dado um request com url, method e body válidos eu terei uma resposta do tipo MAP, independente
+    /// se o programa ainda não estiver com isso implementado.
+
     await sut.auth(params);
     //var x = await sut.auth();
     //var y = await httpClientFake.request(url: url);
@@ -102,5 +124,25 @@ void main() {
     final future = sut.auth(params);
 
     expect(future, throwsA(DomainError.invalidCredencials));
+  });
+
+  /// Nesse caso aqui queremos mocar o httpClient para ele retornar não mais um erro mas
+  /// sim sucesso com dados. A resposta deve seguir a maneira como a api foi construida.
+  /// Na api a resposta de sucesso a uma requisição de acesso com email e senha é
+  /// {'accessToken': 'string', 'name':'string'}. O cliente http não retorna um Account
+  /// pois ele é uma peça externa ao meu programa.
+  ///
+  test('should return an Account if HttpClient returns 200', () async {
+    final accessToken = faker.guid.guid();
+    when(() =>
+        httpClientFake.request(
+            url: any(named: 'url', that: anything),
+            method: any(named: 'method', that: anything),
+            body: any(named: 'body', that: anything))).thenAnswer(
+        (_) async => {'accessToken': accessToken, 'name': faker.person.name()});
+
+    final account = await sut.auth(params)!;
+
+    expect(account.token, accessToken);
   });
 }

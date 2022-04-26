@@ -1,12 +1,15 @@
 //imports de package externo
 
 //imports de outra camada
+import 'package:manguinho01/domain/entities/entities.dart';
 import 'package:manguinho01/domain/helpers/helpers.dart';
 
 import '../../domain/usecases/usecases.dart'; //para o AuthenticationParams
 //imports de mesma camada
 import '../http/http.dart';
 
+/// Uma das funções do caso de uso RemoteAuthentication é converter o dado
+/// que vem do httpClient em formato de Map para o formato de account
 class RemoteAuthentication {
   final HttpClient httpClient;
   final String url;
@@ -16,10 +19,13 @@ class RemoteAuthentication {
     required this.url,
   });
 
-  Future<void>? auth(AuthenticationParams params) async {
+  Future<AccountEntity>? auth(AuthenticationParams params) async {
     final body = RemoteAuthenticationParams.fromDomain(params).toJason();
     try {
-      return await httpClient.request(url: url, method: 'post', body: body);
+      final httpResponse =
+          await httpClient.request(url: url, method: 'post', body: body)!;
+
+      return AccountEntity.fromJson(httpResponse);
     } on HttpError catch (error) {
       throw (error == HttpError.unauthorizedCredencials)
           ? DomainError.invalidCredencials
