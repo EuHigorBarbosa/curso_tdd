@@ -1,6 +1,7 @@
 //imports de package externo
 
 //imports de outra camada
+import 'package:manguinho01/data_layer/models/models.dart';
 import 'package:manguinho01/domain/entities/entities.dart';
 import 'package:manguinho01/domain/helpers/helpers.dart';
 
@@ -23,9 +24,12 @@ class RemoteAuthentication {
     final body = RemoteAuthenticationParams.fromDomain(params).toJason();
     try {
       final httpResponse =
-          await httpClient.request(url: url, method: 'post', body: body)!;
+          await httpClient.request(url: url, method: 'post', body: body);
 
-      return AccountEntity.fromJson(httpResponse);
+      RemoteAccountModel x = RemoteAccountModel.fromJson(httpResponse);
+      return x.toEntity();
+      //*Daria no mesmo se eu retornasse:
+      //*return RemoteAccountModel.fromJson(httpResponse).toEntity();
     } on HttpError catch (error) {
       throw (error == HttpError.unauthorizedCredencials)
           ? DomainError.invalidCredencials

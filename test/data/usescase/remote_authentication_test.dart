@@ -35,11 +35,11 @@ void main() {
   });
   test('should call HttpClient with correct URL and values', () async {
     ///Eu preciso adicionar um mock de caso de sucesso para que ele não gere uma
-    ///exceção ao usar os parametros Mocados que vieram do setup. No setUp eu moco um RemoteAuthentication de nome sut.
+    ///exceção ao usar o param mocado que vieram do setup. No setUp eu moco um RemoteAuthentication de nome sut.
     ///Esse sut é utilizado pelo metodo auth(). Se eu não mocar o caso de sucesso (ou seja, se eu não simular que a resposta
     ///a um request utilizando params é um map válido do tipo {'accessToken: 'x': 'name':'y'}) aí então ele vai utilizar o
     ///auth lá do programa. E no programa real, caso não haja uma resposta válida (httpResponse válida) aí gera-se null e cai
-    ///no erro de 'null' is not a subtype of Map<dynamic, dynamic> que é a httpREsponse válida. Então tem que mocar o caminho
+    ///no catch por gerar erro de 'null' is not a subtype of Map<dynamic, dynamic> que é a httpREsponse válida. Então tem que mocar o caminho
     ///feliz utilizando:
 
     when(() => httpClientFake.request(
