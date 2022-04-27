@@ -30,6 +30,12 @@ class RemoteAuthentication {
       return x.toEntity();
       //*Daria no mesmo se eu retornasse:
       //*return RemoteAccountModel.fromJson(httpResponse).toEntity();
+
+      // try {
+      // } on Error catch (e) {
+      //   throw (HttpError.badRequest);
+      // }
+
     } on HttpError catch (error) {
       throw (error == HttpError.unauthorizedCredencials)
           ? DomainError.invalidCredencials
