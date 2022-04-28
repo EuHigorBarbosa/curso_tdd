@@ -1,7 +1,3 @@
-// Tenho que rever a aula 10 em seu inteiro teor para determinar quais
-// os tipos de retornos que o programa tinha antes para escolher corretamente
-// os nulls  e o tipos
-
 //imports externos
 import 'package:faker/faker.dart';
 import 'package:mocktail/mocktail.dart'; //imports internos ao flutter
@@ -22,9 +18,27 @@ void main() {
   late RemoteAuthentication sut;
   late String url;
   late AuthenticationParams params;
+
+  //Essa parte do programa tem a ver com permitir que se use any onde os datas tem values.
   setUpAll(() {
     registerFallbackValue(HttpClientSpy());
   });
+
+  Map mockValidDataReceivedFromHttpClient() =>
+      {'accessToken': faker.guid.guid(), 'name': faker.person.name()};
+
+  When _mockRequest() => when(() => httpClientFake.request(
+      url: any(named: 'url', that: anything),
+      method: any(named: 'method', that: anything),
+      body: any(named: 'body', that: anything)));
+
+  void mockHttpData(Map data) {
+    _mockRequest().thenAnswer((_) async => data);
+  }
+
+  void mockHttpError(HttpError error) {
+    _mockRequest().thenThrow(error);
+  }
 
   setUp(() {
     httpClientFake = HttpClientSpy();
@@ -33,6 +47,7 @@ void main() {
     params = AuthenticationParams(
         email: faker.internet.email(), secret: faker.internet.password());
   });
+
   test('should call HttpClient with correct URL and values', () async {
     ///Eu preciso adicionar um mock de caso de sucesso para que ele não gere uma
     ///exceção ao usar o param mocado que vieram do setup. No setUp eu moco um RemoteAuthentication de nome sut.
@@ -42,12 +57,14 @@ void main() {
     ///no catch por gerar erro de 'null' is not a subtype of Map<dynamic, dynamic> que é a httpREsponse válida. Então tem que mocar o caminho
     ///feliz utilizando:
 
-    when(() => httpClientFake.request(
-            url: any(named: 'url', that: anything),
-            method: any(named: 'method', that: anything),
-            body: any(named: 'body', that: anything)))
-        .thenAnswer((_) async =>
-            {'accessToken': faker.guid.guid(), 'name': faker.person.name()});
+    mockHttpData(mockValidDataReceivedFromHttpClient());
+    //? Tudo isso em azul foi substituido por essas duas funções acima.
+    //? when(() => httpClientFake.request(
+    //?         url: any(named: 'url', that: anything),
+    //?         method: any(named: 'method', that: anything),
+    //?         body: any(named: 'body', that: anything)))
+    //?     .thenAnswer((_) async =>
+    //?         {'accessToken': faker.guid.guid(), 'name': faker.person.name()});
 
     /// Aqui eu simulo que dado um request com url, method e body válidos eu terei uma resposta do tipo MAP, independente
     /// se o programa ainda não estiver com isso implementado.
@@ -74,11 +91,7 @@ void main() {
   test(
       'should throw UnexpectedError if HttpClient returns 400 (dados inválidos)',
       () async {
-    when(() => httpClientFake.request(
-            url: any(named: 'url', that: anything),
-            method: any(named: 'method', that: anything),
-            body: any(named: 'body', that: anything)))
-        .thenThrow(HttpError.badRequest);
+    mockHttpError(HttpError.badRequest);
 
     final future = sut.auth(params);
 
@@ -87,11 +100,7 @@ void main() {
 
   test('should throw UnexpectedError if HttpClient returns 404 (url inválida)',
       () async {
-    when(() => httpClientFake.request(
-            url: any(named: 'url', that: anything),
-            method: any(named: 'method', that: anything),
-            body: any(named: 'body', that: anything)))
-        .thenThrow(HttpError.notFound);
+    mockHttpError(HttpError.notFound);
 
     final future = sut.auth(params);
 
@@ -101,11 +110,7 @@ void main() {
   test(
       'should throw UnexpectedError if HttpClient returns 500 (falha no servidor)',
       () async {
-    when(() => httpClientFake.request(
-            url: any(named: 'url', that: anything),
-            method: any(named: 'method', that: anything),
-            body: any(named: 'body', that: anything)))
-        .thenThrow(HttpError.serverError);
+    mockHttpError(HttpError.serverError);
 
     final future = sut.auth(params);
 
@@ -115,11 +120,7 @@ void main() {
   test(
       'should throw InvalidCredencialsError if HttpClient returns 401 (Unauthorized credentials)',
       () async {
-    when(() => httpClientFake.request(
-            url: any(named: 'url', that: anything),
-            method: any(named: 'method', that: anything),
-            body: any(named: 'body', that: anything)))
-        .thenThrow(HttpError.unauthorizedCredencials);
+    mockHttpError(HttpError.unauthorizedCredencials);
 
     final future = sut.auth(params);
 
@@ -133,27 +134,31 @@ void main() {
   /// pois ele é uma peça externa ao meu programa.
   ///
   test('should return an Account if HttpClient returns 200', () async {
-    final accessToken = faker.guid.guid();
-    when(() =>
-        httpClientFake.request(
-            url: any(named: 'url', that: anything),
-            method: any(named: 'method', that: anything),
-            body: any(named: 'body', that: anything))).thenAnswer(
-        (_) async => {'accessToken': accessToken, 'name': faker.person.name()});
-
+    final validData = mockValidDataReceivedFromHttpClient();
+    mockHttpData(validData);
     final account = await sut.auth(params)!;
+    expect(account.token, validData['accessToken']);
+    //* A única diferença desse para o debaixo é que aqui eu quero capturar essa parte
+    //* do access token.
 
-    expect(account.token, accessToken);
+    //? final accessToken = faker.guid.guid();
+    //? Vou deixar como era antes de se fazer a utilização das funções resumo:
+    //? when(() =>
+    //?     httpClientFake.request(
+    //?         url: any(named: 'url', that: anything),
+    //?         method: any(named: 'method', that: anything),
+    //?         body: any(named: 'body', that: anything))).thenAnswer(
+    //?     (_) async => {'accessToken': accessToken, 'name': faker.person.name()});
+
+    //? final account = await sut.auth(params)!;
+
+    //? expect(account.token, accessToken);
   });
 
   test(
       'should throw UnexpectedError if HttpClent returns 200 with invalid data',
       () async {
-    when(() => httpClientFake.request(
-            url: any(named: 'url', that: anything),
-            method: any(named: 'method', that: anything),
-            body: any(named: 'body', that: anything)))
-        .thenAnswer((_) async => {'invalidKey': 'invalidValue'});
+    mockHttpData({'invalidKey': 'invalidValue'});
 
     final future = sut.auth(params);
 
