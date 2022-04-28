@@ -11,7 +11,7 @@ import '../http/http.dart';
 
 /// Uma das funções do caso de uso RemoteAuthentication é converter o dado
 /// que vem do httpClient em formato de Map para o formato de account
-class RemoteAuthentication {
+class RemoteAuthentication implements Authentication {
   final HttpClient httpClient;
   final String url;
 
@@ -19,7 +19,7 @@ class RemoteAuthentication {
     required this.httpClient,
     required this.url,
   });
-
+  @override
   Future<AccountEntity>? auth(AuthenticationParams params) async {
     final body = RemoteAuthenticationParams.fromDomain(params).toJason();
     try {
