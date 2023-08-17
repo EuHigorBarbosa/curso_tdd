@@ -2,8 +2,10 @@ import 'dart:io';
 
 import 'package:faker/faker.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:manguinho01/data_layer/http/http_client.dart';
 import 'package:mocktail/mocktail.dart';
+
+import 'package:manguinho01/domain/usecases/usecases.dart';
+import 'package:manguinho01/data_layer/http/http_client.dart';
 
 /// Essa classe foi criada para viabilizar o teste. Ela não existia.
 /// Ele sabe que ela existe por causa do diagrama inicial. 
@@ -12,14 +14,15 @@ class RemoteAuthentication {
   final String url;
 
   RemoteAuthentication({required this.httpClient, required this.url});
-  Future<void> auth() async {
-    await httpClient.request(url:url, method: 'post');
+  Future<void> auth(AuthenticationParams params) async {
+    await httpClient.request(url:url, method: 'post',body: {'email': params.email, 'password':params.secret });
   }
 }
 abstract class HttpClient {
   Future<void>? request({
     required String url,
     required String method,
+    Map body,
     });
 }
 
@@ -37,29 +40,38 @@ void main() {
   late RemoteAuthentication sut;
   late HttpClientSpy httpClient;
   late String url;
+  late AuthenticationParams params;
 
   setUp(() {
     httpClient = HttpClientSpy();
     url = faker.internet.httpUrl();
     sut = RemoteAuthentication(httpClient: httpClient, url: url);
+    params = AuthenticationParams(email: faker.internet.email(), secret: faker.internet.password());
   });
   test('Should call httpClient with correct URL',() async {
     // Arrange by Setup(system under test)
-
+    
     // act
-    await sut.auth();
+    await sut.auth(params);
 
     // Assert - é pra garantir que a url que o request vai receber é a mesma 
-    verify(()=> httpClient.request(url: url, method: 'post'));
+    verify(()=> httpClient.request(
+      url: url, 
+      method: 'post',
+      body: {'email':params.email, 'password':params.secret}
+      ));
   });
   test('Should call httpClient with correct value',() async {
     // Arrange by Setup(system under test)
    
 
     // act
-    await sut.auth();
+    await sut.auth(params);
 
     // Assert - é pra garantir que a url que o request vai receber é a mesma 
-    verify(()=> httpClient.request(url: url, method: 'post'));
+    verify(()=> httpClient.request(
+      url: url, 
+      method: 'post',
+      body: {'email':params.email, 'password':params.secret}));
   });
 }
