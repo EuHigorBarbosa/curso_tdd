@@ -1,3 +1,4 @@
+import '../../data_layer/utilities/json_converter.dart';
 import '../entities/entities.dart';
 
 // abstract class Authentication {
@@ -20,4 +21,6 @@ class AuthenticationParams {
     required this.email,
     required this.secret,
   });
+  Map<String, dynamic> toJson() => JsonConverter.toJson(this);
+  //Map toJson () => {'email': email, 'password': secret};
 }
