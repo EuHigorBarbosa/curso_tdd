@@ -34,12 +34,17 @@ void main() {
   /// foram chamadas com os argumentos tidos como certos. Existem outras formas de 
   /// verificar com as funções: [verifyNever], [verifyInOrder], [verifyZeroInteractions], and
   /// [verifyNoMoreInteractions].
- 
+  late RemoteAuthentication sut;
+  late HttpClientSpy httpClient;
+  late String url;
+
+  setUp(() {
+    httpClient = HttpClientSpy();
+    url = faker.internet.httpUrl();
+    sut = RemoteAuthentication(httpClient: httpClient, url: url);
+  });
   test('Should call httpClient with correct URL',() async {
-    // Arrange(system under test)
-    final httpClient = HttpClientSpy();
-    final url = faker.internet.httpUrl();
-    final sut = RemoteAuthentication(httpClient: httpClient, url: url);
+    // Arrange by Setup(system under test)
 
     // act
     await sut.auth();
@@ -48,10 +53,8 @@ void main() {
     verify(()=> httpClient.request(url: url, method: 'post'));
   });
   test('Should call httpClient with correct value',() async {
-    // Arrange(system under test)
-    final httpClient = HttpClientSpy();
-    final url = faker.internet.httpUrl();
-    final sut = RemoteAuthentication(httpClient: httpClient, url: url);
+    // Arrange by Setup(system under test)
+   
 
     // act
     await sut.auth();
