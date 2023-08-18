@@ -1,30 +1,18 @@
 import 'dart:io';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'package:faker/faker.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+
+import 'package:manguinho01/data_layer/usecases/usecases.dart';
 
 import 'package:manguinho01/domain/usecases/usecases.dart';
 import 'package:manguinho01/data_layer/http/http_client.dart';
 
 /// Essa classe foi criada para viabilizar o teste. Ela não existia.
 /// Ele sabe que ela existe por causa do diagrama inicial. 
-class RemoteAuthentication {
-  final HttpClient httpClient;
-  final String url;
 
-  RemoteAuthentication({required this.httpClient, required this.url});
-  Future<void> auth(AuthenticationParams params) async {
-    await httpClient.request(url:url, method: 'post',body: {'email': params.email, 'password':params.secret });
-  }
-}
-abstract class HttpClient {
-  Future<void>? request({
-    required String url,
-    required String method,
-    Map body,
-    });
-}
+
 
 class HttpClientSpy extends Mock implements HttpClient{}
 void main() {
