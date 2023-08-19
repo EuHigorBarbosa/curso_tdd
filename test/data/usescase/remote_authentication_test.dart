@@ -2,17 +2,14 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:faker/faker.dart';
+import 'package:manguinho01/data_layer/http/http.dart';
+import 'package:manguinho01/domain/helpers/helpers.dart';
 import 'package:mocktail/mocktail.dart';
 
 import 'package:manguinho01/data_layer/usecases/usecases.dart';
 
 import 'package:manguinho01/domain/usecases/usecases.dart';
 import 'package:manguinho01/data_layer/http/http_client.dart';
-
-/// Essa classe foi criada para viabilizar o teste. Ela não existia.
-/// Ele sabe que ela existe por causa do diagrama inicial. 
-
-
 
 class HttpClientSpy extends Mock implements HttpClient{}
 void main() {
@@ -43,13 +40,15 @@ void main() {
     await sut.auth(params);
 
     // Assert - é pra garantir que a url que o request vai receber é a mesma 
-    verify(()=> httpClient.request(
-      url: url, 
-      method: 'post',
-      body: {'email':params.email, 'password':params.secret}
-      ));
+    verify(()  {
+      return  httpClient.request(
+        url: url, 
+        method: 'post',
+        body: {'email':params.email, 'password':params.secret}
+        );
+      });
   });
-  test('Should call httpClient with correct value',() async {
+  test('Should call httpClient with correct values',() async {
     // Arrange by Setup(system under test)
    
 
@@ -62,4 +61,24 @@ void main() {
       method: 'post',
       body: {'email':params.email, 'password':params.secret}));
   });
+
+
+  test('Should throw unexpected error if HttpClient returns 400',() async {
+    // Arrange by Setup(system under test)
+    ///Portanto, no contexto do seu teste, o anyNamed('method') está sendo 
+    ///usado para garantir que a chamada ao método get inclua um argumento nomeado 
+    ///'method', mas não importa qual seja o valor desse argumento. 
+    ///Isso permite que você defina o comportamento esperado para a chamada do método, 
+    ///independentemente dos cabeçalhos específicos que estão sendo passados.
+
+    when(()=> httpClient.request(url: any(named: 'url'),method: any(named:'method'), body: any(named:'body'))).thenThrow(HttpError.badRequest);
+
+    // act
+    final future = sut.auth(params);
+
+    // Assert - é pra garantir que a url que o request vai receber é a mesma 
+    expect(future, throwsA(DomainError.unexpected));
+  });
+
+  
 }

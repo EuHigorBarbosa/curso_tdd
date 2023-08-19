@@ -3,7 +3,7 @@
 # Remote Authentication Use Case
 
 >## Caso de sucesso (fluxo do happy path)
-1. [OK] Sistema valida os dados
+1. [OK] Sistema valida os dados (estamos enviando o dado para a api com o formato que a api espera receber)
 2. [OK] Sistema faz uma requisição para a URL da API de login
 3. [OK] Sistema valida os dados recebidos da API
 4. [OK] Sistema entrega os dados da conta do usuário
