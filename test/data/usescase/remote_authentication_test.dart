@@ -80,14 +80,18 @@ void main() {
     expect(future, throwsA(DomainError.unexpected));
   });
   test('Should throw unexpected error if HttpClient returns 404',() async {
-    // Arrange by Setup(system under test)
-    ///Portanto, no contexto do seu teste, o anyNamed('method') está sendo 
-    ///usado para garantir que a chamada ao método get inclua um argumento nomeado 
-    ///'method', mas não importa qual seja o valor desse argumento. 
-    ///Isso permite que você defina o comportamento esperado para a chamada do método, 
-    ///independentemente dos cabeçalhos específicos que estão sendo passados.
-
+ 
     when(()=> httpClient.request(url: any(named: 'url'),method: any(named:'method'), body: any(named:'body'))).thenThrow(HttpError.notFound);
+
+    // act
+    final future = sut.auth(params);
+
+    // Assert - é pra garantir que a url que o request vai receber é a mesma 
+    expect(future, throwsA(DomainError.unexpected));
+  });
+  test('Should throw unexpected error if HttpClient returns 500',() async {
+ 
+    when(()=> httpClient.request(url: any(named: 'url'),method: any(named:'method'), body: any(named:'body'))).thenThrow(HttpError.serverError);
 
     // act
     final future = sut.auth(params);
