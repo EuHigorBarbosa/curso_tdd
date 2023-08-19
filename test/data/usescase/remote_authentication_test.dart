@@ -99,6 +99,16 @@ void main() {
     // Assert - é pra garantir que a url que o request vai receber é a mesma 
     expect(future, throwsA(DomainError.unexpected));
   });
+  test('Should throw InvalidCredentialsErrors if HttpClient returns 401',() async {
+ 
+    when(()=> httpClient.request(url: any(named: 'url'),method: any(named:'method'), body: any(named:'body'))).thenThrow(HttpError.unauthorizedCredencials);
+
+    // act
+    final future = sut.auth(params);
+
+    // Assert - é pra garantir que a url que o request vai receber é a mesma 
+    expect(future, throwsA(DomainError.invalidCredencials));
+  });
 
   
 }
